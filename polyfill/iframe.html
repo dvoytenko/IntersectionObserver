@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html id="html">
+<head>
+<meta name="description" content="InOb polyfill">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+  <style>
+#log_el {
+  display: none;
+  white-space: pre-wrap;
+  background: lightgray;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  overflow: auto;
+}
+
+
+.block {
+  width: 80px;
+  height: 80px;
+  background: yellow;
+  margin: 4px;
+}
+  </style>
+</head>
+<body id="body">
+
+
+  <div id="log_el"></div>
+
+  <!--
+  <div style="height: 80vh;"></div>
+  -->
+
+  <nav>
+    <button onclick="toggle()">Toggle</button>
+  </nav>
+
+  <div id="green" class="block" style="background: green;"></div>
+  <div id="red" class="block" style="background: red;" hidden></div>
+  <div id="blue" class="block" style="background: blue; display:none;"></div>
+
+  <iframe id="iframe1" srcdoc='
+    <style>
+      .block {
+        width: 80px;
+        height: 80px;
+        background: yellow;
+        margin: 4px;
+      }
+    </style>
+    <div id="ifr_green" class="block" style="background: green;"></div>
+    <div id="ifr_red" class="block" style="background: red;" hidden></div>
+    <div id="ifr_blue" class="block" style="background: blue; display:none;"></div>
+  ' scrolling="yes"></iframe>
+
+  <div style="height: 80vh;"></div>
+
+  <div id="magenta" class="block" style="background: magenta;"></div>
+
+
+  <script>
+function log(m) {
+  console.log('LOG> ', m);
+  log_el.textContent += '> ' + m + '\n';
+  log_el.scrollTop = 10000;
+}
+
+function uninstall(win) {
+  delete win.IntersectionObserver;
+  delete win.IntersectionObserverEntry;
+}
+
+function installPolyfill(win, isIframe) {
+  // TODO
+  // uninstall(win);
+  return new Promise((resolve, reject) => {
+    if (!isIframe) {
+      const script = win.document.createElement('script');
+      script.onload = resolve;
+      script.onerror = reject;
+      script.id = 'inob-polyfill-script'
+      script.src = 'https://unpkg.com/intersection-observer@0.7.0/intersection-observer.js';
+      win.document.head.appendChild(script);
+    } else {
+      if (win.IntersectionObserver) {
+        resolve();
+        return;
+      }
+      win.IntersectionObserverEntry = win.parent.IntersectionObserverEntry;
+      win.IntersectionObserver = class {
+        constructor(callback, options) {
+          const localOptions = {root: win.document.documentElement, ...options};
+          this.inst_ = new win.parent.IntersectionObserver(callback, localOptions);
+          win.document.addEventListener('scroll', () => {
+            this.inst_._checkForIntersections();
+          }, true);
+        }
+        observe(target) {
+          this.inst_.observe(target);
+        }
+      };
+      resolve();
+    }
+  });
+}
+
+function rect({top, left, width, height}) {
+  return `[${Math.floor(left)}, ${Math.floor(top)}, ${width}, ${height}]`;
+}
+
+function track(win, otherWin = false, prefix = '') {
+  const inob = new win.IntersectionObserver(function(records) {
+    records.forEach(record => {
+      log('#' + prefix + record.target.id + ': '
+         + record.isIntersecting
+         + ' // ' + record.intersectionRatio
+         + ' // ' + rect(record.boundingClientRect)
+         + ' // ' + rect(record.intersectionRect)
+         + ' // ' + (record.rootBounds && rect(record.rootBounds))
+         );
+    });
+  });
+  inob.observe(document.documentElement);
+  inob.observe(document.body);
+  win.document.querySelectorAll('.block').forEach(e => inob.observe(e));
+
+  if (otherWin) {
+    iframe1.contentDocument.querySelectorAll('.block').forEach(e => inob.observe(e));
+  }
+}
+
+function toggle() {
+  if (red.hidden) {
+    //QQQQ
+//    red.hidden = false;
+//    blue.style.display = '';
+    iframe1.contentWindow.ifr_red.hidden = false;
+    iframe1.contentWindow.ifr_blue.style.display = '';
+  } else {
+//    red.hidden = true;
+//    blue.style.display = 'none';
+    iframe1.contentWindow.ifr_red.hidden = true;
+    iframe1.contentWindow.ifr_blue.style.display = 'none';
+  }
+}
+
+
+log('Started');
+
+installPolyfill(window, false).then(() => {
+  log('polyfill installed');
+  log('IsNative: ' + window.IntersectionObserver.toString().includes('[native'));
+  //log('inob: ' + IntersectionObserver);
+
+  const iframeLoaded = new Promise(resolve => {
+    iframe1.onload = resolve;
+    setTimeout(resolve, 2000);
+  });
+  iframeLoaded.then(() => {
+    return installPolyfill(iframe1.contentWindow, true);
+  }).then(() => {
+    log('iframe.polyfill installed');
+    log('iframe.IsNative: ' + iframe1.contentWindow.IntersectionObserver.toString().includes('[native'));
+    track(window, true);
+    track(iframe1.contentWindow, false, '#');
+  });
+});
+  </script>
+</body>
+</html>

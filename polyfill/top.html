@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Top Tests</title>
+
+  <!-- QQQQQ: remove this file entirely -->
+</head>
+<body>
+
+  <div style="height: 120vh;"></div>
+
+  <iframe src="http://ads.localhost:8081/iframe.html" scrolling="yes"></iframe>
+
+  <div style="height: 160vh;"></div>
+
+</body>
+</html>
+
+
+<!--
+  same origin:
+    ON SCREEN:
+      #green: true  // 1   // [12, 33, 80, 80]  // [12, 32, 80, 80]  // [0, 0, 473, 777]
+      #body:  true  // 0.3 // [8, 8, 284, 471]  // [8, 7, 284, 142]  // [0, 0, 473, 777]
+      #html:  true  // 0.3 // [0, 0, 300, 487]  // [0, -1, 300, 150] // [0, 0, 473, 777]
+
+    PARTIALLY OFF SCREEN (margin-top: -40px):
+      #green: true // 0.8  // [12, 33, 80, 80]  // [12, 50, 80, 63]  // [0, 0, 473, 777]
+      #body:  true // 0.21 // [8, 8, 284, 471]  // [8, 50, 284, 100] // [0, 0, 473, 777]
+      #html:  true // 0.2  // [0, 0, 300, 487]  // [0, 50, 300, 100] // [0, 0, 473, 777]
+
+    OFF SCREEN (margin-top: 120vh):
+      #green: false // 0 // [12, 33, 80, 80] // [0, 0, 0, 0] // [0, 0, 473, 777]
+      #body:  false // 0 // [8, 8, 284, 471] // [0, 0, 0, 0] // [0, 0, 473, 777]
+      #html:  false // 0 // [0, 0, 300, 487] // [0, 0, 0, 0] // [0, 0, 473, 777]
+
+
+  cross-origin:
+    ON SCREEN:
+      #green: true  // 1   // [12, 33, 80, 80]  // [12, 33, 80, 80]  // null
+      #body:  true  // 0.3 // [8, 8, 284, 471]  // [8, 8, 284, 142]  // null
+      #html:  true  // 0.3 // [0, 0, 300, 487]  // [0, 0, 300, 150]  // null
+
+    PARTIALLY OFF SCREEN (margin-top: -40px):
+      #green: true // 0.8  // [12, 33, 80, 80]  // [12, 50, 80, 63]  // null
+      #body:  true // 0.21 // [8, 8, 284, 471]  // [8, 50, 284, 100] // null
+      #html:  true // 0.2  // [0, 0, 300, 487]  // [0, 50, 300, 100] // null
+
+    OFF SCREEN (margin-top: 120vh):
+      #green: false // 0   // [12, 33, 80, 80]  // [0, 0, 0, 0]  // null
+      #body:  false // 0   // [8, 8, 284, 471]  // [0, 0, 0, 0]  // null
+      #html:  true  // 0   // [0, 0, 300, 487]  // [0, 0, 0, 0]  // null
+-->
