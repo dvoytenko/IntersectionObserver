@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html id="html">
+<head>
+<meta name="description" content="InOb polyfill">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>JS Bin</title>
+</head>
+<body id="body">
+
+    Log:
+    <div id='log_el' style='white-space: pre-wrap;'></div>
+
+    <script>
+      var inob = new IntersectionObserver(function(records) {
+        records.forEach(function(record) {
+          console.log('record: ', record);
+          var rect = record.intersectionRect;
+          log_el.textContent += '> ' + record.target.tagName.toLowerCase() + ': isIntersecting=' + record.isIntersecting + '; rect=' + JSON.stringify({x: rect.x, y: rect.y, w: rect.width, h: rect.height}) + '\n';
+        });
+      });
+      inob.observe(document.documentElement);
+      inob.observe(document.body);
+    </script>
+</body>
+</html>
