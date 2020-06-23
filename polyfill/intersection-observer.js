@@ -33,12 +33,35 @@ if ('IntersectionObserver' in window &&
   return;
 }
 
+/**
+ * Returns the embedding frame element, if any.
+ * @param {!Document} doc
+ * @return {!Element}
+ */
+function getFrameElement(doc) {
+  try {
+    return doc.defaultView && doc.defaultView.frameElement || null;
+  } catch (e) {
+    // Ignore the error.
+    return null;
+  }
+}
+
+console.log('QQQQ: loading window ', window == top, window.location.href);
 
 /**
- * A local reference to the document.
+ * A local reference to the root document.
  */
-var document = window.document;
-
+var document = (function(startDoc) {
+  var doc = startDoc;
+  var frame = getFrameElement(doc);
+  while (frame) {
+    doc = frame.ownerDocument;
+    frame = getFrameElement(doc);
+  }
+  console.log('QQQQ: startDoc -> doc', startDoc == doc, startDoc.baseURI, doc.baseURI);
+  return doc;
+})(window.document);
 
 /**
  * An IntersectionObserver registry. This registry exists to hold a strong
@@ -956,21 +979,6 @@ function getParentNode(node) {
   }
 
   return parent;
-}
-
-
-/**
- * Returns the embedding frame element, if any.
- * @param {!Document} doc
- * @return {!Element}
- */
-function getFrameElement(doc) {
-  try {
-    return doc.defaultView && doc.defaultView.frameElement || null;
-  } catch (e) {
-    // Ignore the error.
-    return null;
-  }
 }
 
 
