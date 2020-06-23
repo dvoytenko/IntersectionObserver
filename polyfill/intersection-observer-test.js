@@ -1620,7 +1620,7 @@ describe('IntersectionObserver', function() {
       });
     });
 
-    describe.only('same-origin iframe loaded in iframe', function() {
+    describe('same-origin iframe loaded in iframe', function() {
       var ASYNC_TIMEOUT = 300;
 
       beforeEach(function(done) {
